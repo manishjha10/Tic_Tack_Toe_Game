@@ -1,3 +1,29 @@
+// Get the game mode from localStorage ("single" or "double")
+// const gameMode = localStorage.getItem("mode") || "double"; // default double player
+
+// // Flag to track if AI should play (true if single player mode and AI's turn)
+// let isAITurn = false;
+
+let isSinglePlayer = false;
+
+const gameMode = localStorage.getItem("gameMode");
+if (gameMode === "single") {
+  isSinglePlayer = true;
+} else {
+  isSinglePlayer = false;
+}
+
+window.onload = () => {
+  resetGame(); // Or the function that sets up your game board
+};
+
+
+
+
+
+
+
+
 let boxes = document.querySelectorAll(".box"); 
 let resetBtn = document.querySelector("#reset");
 let newGame =   document.querySelector("#newGame");
@@ -21,28 +47,90 @@ const winPattern  = [
 ];
 
 
-let moveCount = 0;
-boxes.forEach( (box) => {
-    box.addEventListener("click" , () => {
-      // console.log("box was print") ;
+// let moveCount = 0;
+// boxes.forEach( (box) => {
+//     box.addEventListener("click" , () => {
+//       // console.log("box was print") ;
 
-      if(turnO == true)
-      {
-        box.innerText = "O" ;
-        turnO = false ;
-      }
-      else  
-      {
-        box.innerText = "X" ;
-        turnO = true ;
-      } 
+//       if(turnO == true)
+//       {
+//         box.innerText = "O" ;
+//         turnO = false ;
+//       }
+//       else  
+//       {
+//         box.innerText = "X" ;
+//         turnO = true ;
+//       } 
 
-      box.disabled = true;  
-      moveCount ++ ;
-      checkWinner() ;
+//       box.disabled = true;  
+//       moveCount ++ ;
+//       checkWinner() ;
           
-    });
-}) ;
+//     });
+// }) ;
+
+
+
+/*  For the mode selection code  */
+
+boxes.forEach((box) => {
+  box.addEventListener("click", () => {
+    // If box already clicked or game ended, do nothing
+    if (box.disabled) return;
+    if (flag) return;  // flag means game over
+
+    // Player's move
+    if (turnO) {
+      box.innerText = "O";
+      turnO = false;
+    } else {
+      box.innerText = "X";
+      turnO = true;
+    }
+
+    box.disabled = true;
+    moveCount++;
+    checkWinner();
+
+    // If single player and game not ended, trigger AI move after short delay
+    if (gameMode === "single" && !flag && moveCount < 9) {
+      isAITurn = true;
+      setTimeout(aiMove, 500);
+    }
+  });
+});
+
+
+
+function aiMove() {
+  if (!isAITurn) return;
+
+  // Find all empty boxes
+  let emptyBoxes = [];
+  boxes.forEach((box, index) => {
+    if (box.innerText === "" && !box.disabled) {
+      emptyBoxes.push(index);
+    }
+  });
+
+  if (emptyBoxes.length === 0) return;
+
+  // Pick random empty box
+  const randomIndex = emptyBoxes[Math.floor(Math.random() * emptyBoxes.length)];
+  boxes[randomIndex].innerText = "X";
+  boxes[randomIndex].disabled = true;
+
+  turnO = true; // back to player O's turn
+  moveCount++;
+  checkWinner();
+
+  isAITurn = false;
+}
+
+
+
+
 
 
 
